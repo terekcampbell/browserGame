@@ -1,0 +1,23 @@
+.resource-title {
+	text-align: center;
+	font-weight: bold;
+	margin-right: 25px;
+}
+
+.resource-value {
+	text-align: center;
+	margin-right: 25px;
+}
+
+.item-value {
+	text-align: center;
+	margin-right: 25px;
+}
+
+#refreshForm {
+	margin-top: 25px;
+}
+
+#previous-job {
+	display: none;
+}

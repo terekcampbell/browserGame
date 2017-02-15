@@ -1,0 +1,20 @@
+{
+    "userCount": 1,
+    "user1": {
+        "food": 3271.51,
+        "wood": 143925.49,
+        "stone": 3118.95,
+        "level": 1,
+        "population": 1,
+        "hatchets": 5,
+        "pickaxes": 6,
+        "sickles": 6,
+        "currentJob": "Gather Wood",
+        "timers": {
+            "count": 0
+        },
+        "id": 1,
+        "name": "Terek Campbell",
+        "lastUpdate": "2017-02-15T16:53:47.759Z"
+    }
+}
