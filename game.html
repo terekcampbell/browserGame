@@ -62,22 +62,38 @@
 				<button type="button" id="explore">Explore</button>
 			</div>
 		</div>
-<!-- 		<div id='countdown1'></div>
-		<input id="timer1" type="button" value="Start timer 1" />
-		<div id='countdown2'></div>
-		<input id="timer2" type="button" value="Start timer 2" /><br>
- -->
 		<div id="refreshForm">
 				<b>Refresh:</b>
 				<input type="text" name="currentUserId" id="currentUserId" value="user1">
 				<button id="refresh" value="Submit">Submit</button><br>
 		</div>
-
 		<b>New user Creation form:</b>
 		<form action="http://127.0.0.1:8081/addUser" method="post">
 			Name: 
 			<input type="text" name="name">
 			<button type="submit" value="Submit">Submit</button><br>
 		</form>
+
+
+		<div class="ng-resources">
+			<div class="berries">
+				<span class="resource-title">Berries</span>
+				<span class="resource-value berries-counter">0</span>
+				<button type="button" id="gather-berries">Forage Berries</button>
+			</div>
+			<div class="stones">
+				<span class="resource-title">Small Stones</span>
+				<span class="resource-value stones-counter">0</span>
+				<button type="button" id="gather-stones">Gather Small Stones</button>
+			</div>
+		</div>
+		<div class="crafting">
+			<div class="knocked-stone">
+				<span class="knockedstone-title">Knocked Stones</span>
+				<span id="number-of-knockedstones" class="item-value">0</span>
+				<button type="button" id="make-knockedstone">Knock Stone to make sharp</button>
+				<div id='makeKnockedStoneTimer'></div>
+			</div>
+		</div>
 	</body>
 </html>

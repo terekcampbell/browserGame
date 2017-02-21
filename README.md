@@ -6,17 +6,18 @@ A browser and text based resource management single player, time-based progressi
 * Focus on progression of technologies in metal similar to most games, stone, bronze, iron, etc.
 * Take place in an mythical world, but keep to real world science as much as possible
 * Progression of collected foods, not just searching for "food" but actually take an approach such as foraging (fruits, nuts), farm (various crops), hunting?
+* Have berries go bad?
 * Domestication of animals?
 * Similarly, I could do something similar with wood and/or stone? Perhaps not those, but different qualities of iron, wrought iron, cast iron, mild and low carbon steel, higher-carbon steels.
 * I'd like the game to be educational in how things are made
 * Possibly a text based storyline, I don't want any graphical portions currently
 * Possibly have a form of "research"? Would be on a separate timer as actionable things and you would "ponder" different technologies until you figure out certain aspects of them
 * Require the player to "ponder" multiple different aspects of a technology to fully "unlock"/understand it.
-** After a pondering phase, you could have to practice what you thought about, which would cost resources. Likely fail at first, then ponder more, practice more, each time increasing the liklihood of unlocking the tech.
+** After a pondering phase, you could have to practice what you thought about, which would cost resources. Likely fail at first, then ponder more, practice more, each time increasing the likelihood of unlocking the tech.
 * Once the player creates an item, such as a certain quality forge, they keep that item permanantly. But in order to progress, they have to create lots of similar "stations".
 * Require the player to sharpen tools at various times to maintain efficiency?
 * Have items break irreparably sometimes?
-* Find cave to live in at first? Make huts later on. Protection from weather? What would the purpose be? Storage of resourcses? Defenses from animals?
+* Find cave to live in at first? Make huts later on. Protection from weather? What would the purpose be? Storage of resources? Defenses from animals?
 * ~~Move to VC~~
 
 # Notes on tools:
@@ -42,8 +43,9 @@ a tool stone is a type of stone that is used to manufacture stone tools,[1] or s
 
 Possible tools:
 * Mortar and Pestle
-* Metate and Mano (similar to mortar and pestle, used to grind plant materiel) https://en.wikipedia.org/wiki/Mano_(stone)  https://en.wikipedia.org/wiki/Metate
+* Metate and Mano (similar to mortar and pestle, used to grind plant materiel, nuts) https://en.wikipedia.org/wiki/Mano_(stone)  https://en.wikipedia.org/wiki/Metate
 * Knife
+* Hammer Stone and Stone Anvil for nuts. Battered and pitted stones for anvils
 * Sickle
 * Microlith (spear points and arrow heads)
 * Spokeshave (to smooth wooden rods and shafts)
@@ -52,6 +54,14 @@ Possible tools:
 * Mattock (A mattock is a versatile hand tool, used for digging and chopping, similar to the pickaxe.)
 * Axe (An axe is an implement that is used to shape, split and cut wood and,  to harvest timber and as a weapon)
 * An ulu is an all-purpose knife. It is utilized in applications as diverse as skinning and cleaning animals, cutting a child's hair, cutting food and, if necessary, trimming blocks of snow and ice used to build an igloo.
+
+Research:
+* Eat nuts/forage nuts (nuts don't go bad)
+* Crack nuts with tool
+** Smath with rock
+* nut cracking tool (faster than cracking with rock)
+* 
+
 
 References:
 * https://en.wikipedia.org/wiki/Technology
