@@ -13,11 +13,14 @@ A browser and text based resource management single player, time-based progressi
 * Possibly a text based storyline, I don't want any graphical portions currently
 * Possibly have a form of "research"? Would be on a separate timer as actionable things and you would "ponder" different technologies until you figure out certain aspects of them
 * Require the player to "ponder" multiple different aspects of a technology to fully "unlock"/understand it.
-** After a pondering phase, you could have to practice what you thought about, which would cost resources. Likely fail at first, then ponder more, practice more, each time increasing the likelihood of unlocking the tech.
+  * After a pondering phase, you could have to practice what you thought about, which would cost resources. Likely fail at first, then ponder more, practice more, each time increasing the likelihood of unlocking the tech.
 * Once the player creates an item, such as a certain quality forge, they keep that item permanantly. But in order to progress, they have to create lots of similar "stations".
 * Require the player to sharpen tools at various times to maintain efficiency?
 * Have items break irreparably sometimes?
 * Find cave to live in at first? Make huts later on. Protection from weather? What would the purpose be? Storage of resources? Defenses from animals?
+  * Minimal room for storage, minimal room for work stations.
+  * Measure by sqft? separate rooms?
+
 * ~~Move to VC~~
 
 # Notes on tools:
@@ -58,7 +61,7 @@ Possible tools:
 Research:
 * Eat nuts/forage nuts (nuts don't go bad)
 * Crack nuts with tool
-** Smath with rock
+  * Smack with rock
 * nut cracking tool (faster than cracking with rock)
 * 
 

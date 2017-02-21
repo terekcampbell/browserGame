@@ -76,15 +76,27 @@
 
 
 		<div class="ng-resources">
+			<!-- TODO: Add use of storage -->
+			<div>Currently only have hands to gather with. Max 1 minute of gathering</div>
 			<div class="berries">
 				<span class="resource-title">Berries</span>
-				<span class="resource-value berries-counter">0</span>
+				<span class="resource-value" id="berries-quantity">0</span>
 				<button type="button" id="gather-berries">Forage Berries</button>
+				<div id='forageBerriesTimer'></div>
 			</div>
 			<div class="stones">
 				<span class="resource-title">Small Stones</span>
-				<span class="resource-value stones-counter">0</span>
-				<button type="button" id="gather-stones">Gather Small Stones</button>
+				<span class="resource-value" id="smallStones-quantity">0</span>
+				<button type="button" id="gather-smallStones">Gather Small Stones</button>
+				<div id='gatherSmallStonesTimer'></div>
+			</div>
+			<div class="sticks">
+				<span class="resource-title">Stick</span>
+				<span class="resource-value" id="sticks-quantity">0</span>
+				<button type="button" id="gather-sticks-scavenge">Scavenge For Stick</button>
+				<!-- TODO: Add requirement to have appropriate tool -->
+				<button type="button" id="gather-sticks-cut">Cut sticks from trees</button>
+				<div id='gatherSticksTimer'></div>
 			</div>
 		</div>
 		<div class="crafting">
@@ -93,6 +105,18 @@
 				<span id="number-of-knockedstones" class="item-value">0</span>
 				<button type="button" id="make-knockedstone">Knock Stone to make sharp</button>
 				<div id='makeKnockedStoneTimer'></div>
+			</div>
+		</div>
+		<!-- TODO: Add use of shelter -->
+		<div id="shelter">
+			<div>
+				<span>Current Shelter: </span>
+				<span>Small Cave</span>
+			</div>
+			<div>
+				<div>150 sq ft</div>
+				<div>No workstations</div>
+				<div>No extra rooms</div>
 			</div>
 		</div>
 	</body>

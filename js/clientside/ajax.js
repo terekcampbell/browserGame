@@ -1,11 +1,11 @@
 function prepAjax() {
 	$("#refresh").click(refresh);
 
-	$("#gather-food").click({newJob: "Gather Food"},changeJob);
+	$("#gather-food").click({newJob: "Gather Food"},changeJobAjax);
 
-	$("#gather-wood").click({newJob: "Gather Wood"},changeJob);
+	$("#gather-wood").click({newJob: "Gather Wood"},changeJobAjax);
 
-	$("#gather-stone").click({newJob: "Gather Stone"},changeJob);
+	$("#gather-stone").click({newJob: "Gather Stone"},changeJobAjax);
 
 	$("#make-hatchet").click({tool: "Hatchet"},makeToolAjax);
 
@@ -43,7 +43,7 @@ function refresh() {
 	});
 }
 
-function changeJob(event) {
+function changeJobAjax(event) {
 	$.ajax({
 		url : 'http://127.0.0.1:8081/changeJob',
 		type : 'GET',

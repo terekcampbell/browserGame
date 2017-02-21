@@ -1,0 +1,44 @@
+{
+    "food": {
+        "berries": {
+            "nutrition": 1,
+            "timeToExpire": 86400,
+        },
+        "nuts": {
+            "nutrition": 2,
+            "timeToExpire": 2000000,
+            "baseTimeToCrack": 600,
+        },
+    },
+    "tools": {
+        "storage": {
+            "hands": {
+                "capacity": 15,
+            },
+            "stoneBowl": {
+                "capacity": 45,
+            },
+        },
+        "harvest": {
+            "hands": {
+                "speedMultiplier": 1,
+            },
+            "stoneSickle": {
+                "speedMultiplier": 1.2,
+            },
+        },
+    },
+    "actions": {
+        "gathering": {
+            "berries": {
+                "baseAmountPerSecond": 0.3,
+            },
+            "nuts": {
+                "baseAmountPerSecond": 0.1,
+            },
+            "smallStones": {
+                "baseAmountPerSecond": 0.3,
+            },
+        },
+    },
+}
