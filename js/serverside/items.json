@@ -3,11 +3,23 @@
         "berries": {
             "nutrition": 1,
             "timeToExpire": 86400,
+            "volumePerUnit": 0.001,
         },
         "nuts": {
             "nutrition": 2,
             "timeToExpire": 2000000,
             "baseTimeToCrack": 600,
+            "volumePerUnit": 0.005,
+        },
+    },
+    "wood": {
+        "sticks": {
+            "volumePerUnit": 0.5,
+        },
+    },
+    "stone": {
+        "smallStones": {
+            "volumePerUnit": 0.1,
         },
     },
     "tools": {
@@ -38,6 +50,9 @@
             },
             "smallStones": {
                 "baseAmountPerSecond": 0.3,
+            },
+            "sticks": {
+                "baseAmountPerSecond": 0.2,
             },
         },
     },

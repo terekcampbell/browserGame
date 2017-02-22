@@ -1,4 +1,4 @@
-function countdown(element, minutes, seconds, nextFunc, nextFuncArg) {
+function countdown(element, minutes, seconds, nextFunc, nextFuncArg1, nextFuncArg2) {
     $(element).css("display","block");
     if(minutes > 0) {
         var minute_text = minutes + (minutes > 1 ? ' minutes' : ' minute');
@@ -15,7 +15,7 @@ function countdown(element, minutes, seconds, nextFunc, nextFuncArg) {
             if(minutes == 0) {
                 $(element).css("display","none");
                 clearInterval(interval);
-                return nextFunc(nextFuncArg);
+                return nextFunc(nextFuncArg1, nextFuncArg2);
             } else {
                 minutes--;
                 seconds = 60;

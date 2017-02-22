@@ -20,8 +20,10 @@ function prepEvents() {
 	$("#gather-stone").click({newJob: "Gather Stone"},changeJob);
 	// TODO: Add use of storage and tool
 	// TODO: Get storage time, and tool efficiency from items.json
-	$("#gather-berries").click({newJob: "Gather Berries", storage: "hands", toolUsed: "hands", timer: "forageBerriesTimer", timeInSeconds: 2, callback: postGatherBerries}, changeJob);
-	$("#gather-smallStones").click({newJob: "Gather Small Stones", storage: "hands", toolUsed: "hands", timer: "gatherSmallStonesTimer", timeInSeconds: 2, callback: postGatherSmallStones}, changeJob);
+	$("#gather-berries").click({newJob: "Gather Berries", timer: "forageBerriesTimer", timeInSeconds: 2, qtyToIncrease: 10, callback: postGather, qtyElement: "berries-quantity"}, changeJob);
+	$("#gather-smallStones").click({newJob: "Gather Small Stones", timer: "gatherSmallStonesTimer", timeInSeconds: 2, qtyToIncrease: 2, callback: postGather, qtyElement: "smallStones-quantity"}, changeJob);
+	$("#gather-sticks-scavenge").click({newJob: "Gather Sticks", timer: "gatherSticksTimer", timeInSeconds: 3, qtyToIncrease: 3, callback: postGather, qtyElement: "sticks-quantity"}, changeJob);
+	$("#gather-sticks-cut").click({newJob: "Gather Sticks", timer: "gatherSticksTimer", timeInSeconds: 1, qtyToIncrease: 5, callback: postGather, qtyElement: "sticks-quantity"}, changeJob);
 }
 
 function changeJob(args) {
@@ -29,9 +31,13 @@ function changeJob(args) {
 	var timer = args.data.timer;
 	var time = args.data.timeInSeconds;
 	var callback = args.data.callback;
+	var qtyElement = args.data.qtyElement;
+	var qtyToIncrease = args.data.qtyToIncrease;
+	var storageItem = $("#current-storage-item").html();
+	var toolUsed = $("#current-gather-tool").html();
 	$("#previous-job").html($("#current-job").html());
 	$("#current-job").html(newJob);
-	countdown('#'+timer, 0, time, callback, null);
+	countdown('#'+timer, 0, time, callback, qtyElement, qtyToIncrease);
 }
 
 function makeTool(args) {
@@ -70,14 +76,8 @@ function continuePreviousJob() {
 	$("#previous-job").html("");
 }
 
-function postGatherBerries() {
-	var currentBerries = Number($("#berries-quantity").html());
-	$("#berries-quantity").html(currentBerries+10);
-	continuePreviousJob();
-}
-
-function postGatherSmallStones() {
-	var currentSmallStones = Number($("#smallStones-quantity").html());
-	$("#smallStones-quantity").html(currentSmallStones+2);
+function postGather(qtyElement, qtyToIncrease) {
+	var currentQty = Number($("#"+qtyElement).html());
+	$("#"+qtyElement).html(currentQty+qtyToIncrease);
 	continuePreviousJob();
 }
