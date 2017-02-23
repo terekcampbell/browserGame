@@ -16,20 +16,12 @@ var jsonFile = __dirname + "/" + "users.json";
 
 // TODO: Generate based on items.json
 var defaultNewUser = {
-	"food" : 0,
-	"wood" : 0,
-	"stone" : 0,
 	"berries" : 0,
 	"smallStones" : 0,
 	"sticks" : 0,
 	"hands" : 1,
 	"stoneBowl" : 0,
-	"level" : 1,
-	"population" : 1,
-	"hatchets" : 0,
-	"pickaxes" : 0,
-	"sickles" : 0,
-	"currentJob" : "Gather Food",
+	"currentJob" : "No Current Job",
 	"timers" : {
 		"count" : 0,
 	},
@@ -74,11 +66,6 @@ app.get('/makeTool', function (req, res) {
 		var data = refresh(userId, data);
 		console.log("-----MAKE TOOL AFTER REFRESH-----");
 		var user = data[userId];
-		var wood = user.wood;
-		var stone = user.stone;
-		var hatchets = user.hatchets;
-		var pickaxes = user.pickaxes;
-		var sickles = user.sickles;
 		var timers = user.timers
 
 		var currentToolTimer = false;
@@ -88,25 +75,22 @@ app.get('/makeTool', function (req, res) {
 			var timer = timers[tm];
 
 			console.log("timer info: ", timer);
-			if (timer.type === "Making Hatchet" || timer.type === "Making Pickaxe" || timer.type === "Making Sickle") {
-				currentToolTimer = true;
+			if (timer.type === "gather") {
+				currentTimer = true;
 				break;
 			}
 		}
-		if (currentToolTimer === true) {
-			var message = "Already have a tool timer, not creating new one";
+		if (currentTimer === true) {
+			var message = "Already have a timer, not creating new one";
 			console.log(message);
 			res.end(message);
 			return;
 		}
 
-		if (wood >= 10 && stone >= 10) {
-			user.wood -= 10;
-			user.stone -= 10;
-			oldJob = user.currentJob;
-			user.currentJob = "Making "+tool;
-			makeToolTimer(userId, user.lastUpdate, oldJob, 10, tool);
-		}
+		oldJob = user.currentJob;
+		// TODO: Probabably need to change this text
+		user.currentJob = "Making "+tool;
+		makeToolTimer(userId, user.lastUpdate, oldJob, 10, tool);
 
 		var result = JSON.stringify(data,null,4);
 		fs.writeFile(jsonFile, result, function(err) {
@@ -233,40 +217,9 @@ function refresh(userId, data) {
 		var mult = (currentTime - updatedRefreshDate)/1000;
 		// console.log("Time difference in seconds: " + mult);
 
-		var food = user.food;
-		// console.log("Food: " + food);
-		var wood = user.wood;
-		// console.log("Wood: " + wood);
-		var stone = user.stone;
-		// console.log("Stone: " + stone);
-		var level = user.level;
-		// console.log("Level: " + level);
-		var population = user.population;
-		// console.log("Population: " + population);
-		var hatchets = user.hatchets;
-		// console.log("Hatchets: " + hatchets);
-		var pickaxes = user.pickaxes;
-		// console.log("Pickaxes: " + pickaxes);
-		var sickles = user.sickles;
-		// console.log("Sickles: " + sickles);
 		var job = user.currentJob;
 		// console.log("Current Job: " + job);
 
-		if (job === "Gather Food") {
-			food = Number(Number(food += (level*population + Math.min(sickles, population))*mult).toFixed(2));
-			console.log("Updated Food: " + food);
-			user.food = food;
-		}
-		if (job === "Gather Wood") {
-			wood = Number(Number(wood += (level*population + Math.min(hatchets, population))*mult).toFixed(2));
-			console.log("Updated Wood: " + wood);
-			user.wood = wood;
-		}
-		if (job === "Gather Stone") {
-			stone = Number(Number(stone += (level*population + Math.min(pickaxes, population))*mult).toFixed(2));
-			console.log("Updated Stone: " + stone);
-			user.stone  = stone;
-		}
 		user.lastUpdate = currentTime;
 		console.log("-----END REFRESH-----");
 
@@ -369,20 +322,14 @@ function checkForTimer(user, lastUpdate, currentTime) {
 		if (!timers.hasOwnProperty(tm) || tm === "count") continue;
 
 		var timer = timers[tm];
-		// TODO: Simplify to just craft or gather timer check, perhaps remove entirely
-		if (timer.type === "Making Hatchet" || timer.type === "Making Pickaxe" || timer.type === "Making Sickle" || timer.type === "gather") {
+		// TODO: Perhaps remove entirely
+		if (timer.type === "gather") {
 			var timerEndTime = new Date(timer.endTime);
 			currentTimer = true;
 
 			if (currentTime - timerEndTime > 0) {
 				// TODO: simplify
-				if (timer.type === "Making Hatchet") {
-					user.hatchets += 1;
-				} else if (timer.type === "Making Pickaxe") {
-					user.pickaxes += 1;
-				} else if (timer.type === "Making Sickle") {
-					user.sickles += 1;
-				} else if (timer.item === "berries") {
+				if (timer.item === "berries") {
 					user.berries += timer.itemQuantity;
 				} else if (timer.item === "smallStones") {
 					user.smallStones += timer.itemQuantity;

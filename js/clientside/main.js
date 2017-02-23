@@ -1,7 +1,6 @@
 var actionTimer;
 
 $(document).ready(function() {
-    setInterval(updateCounters, 1000);
 	prepAjax();
 	prepEvents();
 });

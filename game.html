@@ -3,64 +3,19 @@
 		<script type="text/javascript" src="js/clientSide/jquery-3.1.0.js"></script>
 		<script type="text/javascript" src="js/clientSide/main.js"></script>
 		<script type="text/javascript" src="js/clientSide/countdown.js"></script>
-		<script type="text/javascript" src="js/clientSide/counters.js"></script>
 		<script type="text/javascript" src="js/clientSide/ajax.js"></script>
 		<link rel="stylesheet" type="text/css" href="css/game.css"></link>
 	</head>
 	<body>
 		<div class="resources">
-			<div class="level">
-				<span class="resource-title">Level</span>
-				<span id="current-level" class="resource-value">1</span>
-				<button type="button" id="level-up">Level Up!</button>
-			</div>
-			<div class="food">
-				<span class="resource-title">Food</span>
-				<span class="resource-value" id="food-quantity">0</span>
-			</div>
-			<div class="wood">
-				<span class="resource-title">Wood</span>
-				<span class="resource-value" id="wood-quantity">0</span>
-			</div>
-			<div class="stone">
-				<span class="resource-title">Stone</span>
-				<span class="resource-value" id="stone-quantity">0</span>
-			</div>
-			<div class="population">
-				<span class="resource-title">Population</span>
-				<span class="resource-value population-counter">1</span>
-			</div>
 			<div class="job">
 				<span class="resource-title">Current Job</span>
-				<span id="current-job" class="resource-value">Gather Food</span>
+				<span id="current-job" class="resource-value">No Current Job</span>
 				<span id="previous-job"></span>
-				<button type="button" id="gather-food">Gather Food</button>
-				<button type="button" id="gather-wood">Gather Wood</button>
-				<button type="button" id="gather-stone">Gather Stone</button>
 			</div>
 		</div>
-		<div class="make-things">
-			<div class="hatchet">
-				<span class="hatchets-title">Hatchets</span>
-				<span id="number-of-hatchets" class="item-value">0</span>
-				<button type="button" id="make-hatchet">Make hatchet</button>
-				<div id='makeHatchetTimer'></div>
-			</div>
-			<div class="pickaxe">
-				<span class="pickaxes-title">Pickaxes</span>
-				<span id="number-of-pickaxes" class="item-value">0</span>
-				<button type="button" id="make-pickaxe">Make pickaxe</button>
-				<div id='makePickaxeTimer'></div>
-			</div>
-			<div class="sickle">
-				<span class="sickles-title">Sickles</span>
-				<span id="number-of-sickles" class="item-value">0</span>
-				<button type="button" id="make-sickle">Make sickle</button>
-				<div id='makeSickleTimer'></div>
-			</div>
-			<div class="explore">
-				<button type="button" id="explore">Explore</button>
-			</div>
+		<div class="explore">
+			<button type="button" id="explore">Explore</button>
 		</div>
 		<div id="refreshForm">
 				<b>Refresh:</b>
