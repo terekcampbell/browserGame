@@ -57,7 +57,7 @@ function changeJobAjax(newJob, element, callback, qtyElement, toolUsed, storageI
 		success : function(jsonResponse) {
 			var jsonResponse = JSON.parse(jsonResponse);
 			var time = jsonResponse.time;
-			var amountCollected = jsonResponse.capacity;
+			var amountCollected = jsonResponse.amountCollected;
 
 			console.log("Success in changeJobAjax");
 			$("#previous-job").html($("#current-job").html());

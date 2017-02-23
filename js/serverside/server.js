@@ -14,10 +14,16 @@ app.use(function(req, res, next) {
 
 var jsonFile = __dirname + "/" + "users.json";
 
+// TODO: Generate based on items.json
 var defaultNewUser = {
 	"food" : 0,
 	"wood" : 0,
 	"stone" : 0,
+	"berries" : 0,
+	"smallStones" : 0,
+	"sticks" : 0,
+	"hands" : 1,
+	"stoneBowl" : 0,
 	"level" : 1,
 	"population" : 1,
 	"hatchets" : 0,
@@ -121,46 +127,6 @@ app.get('/explore', function (req, res) {
 	res.end("Finished Exploring");
 })
 
-function makeToolTimer(userId, lastUpdate, oldJob, seconds, tool) {
-
-	var defaultNewTimer = {
-		"id" : 0,
-		"oldJob" : "",
-		"endTime" : null,
-		"type" : "",
-	}
-
-	console.log("-----START MAKE TOOL TIMER-----");
-	fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
-		var data = refresh(userId, data);
-		var timers = data[userId].timers;
-
-
-		var timerCount = timers.count;
-		timerCount++;
-		timers.count = timerCount;
-
-		var newTimerId = "timer" + timerCount;
-		timers[newTimerId] = defaultNewTimer;
-		timers[newTimerId].id = timerCount;
-		timers[newTimerId].oldJob = oldJob;
-		timers[newTimerId].type = "Making "+tool;
-
-		timers[newTimerId].endTime = addSeconds(lastUpdate, seconds);
-
-		var result = JSON.stringify(data,null,4);
-		fs.writeFile(jsonFile, result, function(err) {
-			if (err) {
-				throw err;
-				res.end("Failed to save in makeToolTimer");
-			}
-			console.log('Successfully saved in makeToolTimer');
-		});
-	});
-
-	console.log("-----END MAKE TOOL TIMER-----");
-}
-
 app.get('/changeJob', function (req, res) {
 	console.log("-----START CHANGE JOB-----");
 	console.log(req.query.newJob);
@@ -172,6 +138,7 @@ app.get('/changeJob', function (req, res) {
 
 	fs.readFile( __dirname + "/" + "users.json", 'utf8', function (usersErr, usersData) {
 		var usersData = refresh(userId, usersData);
+		var lastUpdate = usersData[userId].lastUpdate;
 		usersData[userId].currentJob = newJob;
 		var result = JSON.stringify(usersData,null,4);
 
@@ -180,12 +147,14 @@ app.get('/changeJob', function (req, res) {
 			var speedMultiplier = itemsData.tools.harvest[toolUsed].speedMultiplier;
 			var capacity = itemsData.tools.storage[toolUsed].capacity;
 			var amountPerSecond = itemsData.actions.gathering[collectedItem].baseAmountPerSecond;
-			var maxTime = Math.floor(capacity/(amountPerSecond*speedMultiplier));
-			// TODO: Add timer for job
-			response = {
-				time:maxTime,
-				capacity:capacity
-			};
+			var volumePerUnit = itemsData.resources[collectedItem].gatherVolumePerUnit;
+			if (volumePerUnit == undefined) {
+				volumePerUnit = itemsData.resources[collectedItem].volumePerUnit;
+			}
+			var amountCollected = capacity/volumePerUnit;
+			var maxTime = Math.floor(amountCollected/(amountPerSecond*speedMultiplier));
+			// TODO: make actionType dynamic
+			makeActionTimer(userId, lastUpdate, maxTime, "gather", collectedItem, amountCollected);
 
 			fs.writeFile(jsonFile, result, function(writeErr) {
 				if (writeErr) {
@@ -195,6 +164,10 @@ app.get('/changeJob', function (req, res) {
 				console.log('Job changed successfully');
 			});
 			console.log("-----END CHANGE JOB-----");
+			response = {
+				time:maxTime,
+				amountCollected:amountCollected
+			};
 			res.end(JSON.stringify(response));
 		});
 	});
@@ -256,7 +229,7 @@ function refresh(userId, data) {
 
 		var lastUpdate = new Date(data[userId].lastUpdate);
 		var currentTime = new Date();
-		var updatedRefreshDate = checkForToolTimer(user, lastUpdate, currentTime);
+		var updatedRefreshDate = checkForTimer(user, lastUpdate, currentTime);
 		var mult = (currentTime - updatedRefreshDate)/1000;
 		// console.log("Time difference in seconds: " + mult);
 
@@ -304,49 +277,138 @@ function addSeconds(date, seconds) {
     return new Date(date.getTime() + seconds*1000);
 }
 
-function checkForToolTimer(user, lastUpdate, currentTime) {
-	console.log("-----START checkForToolTimer-----");
+function makeToolTimer(userId, lastUpdate, oldJob, seconds, tool) {
+
+	var defaultNewTimer = {
+		"id" : 0,
+		"oldJob" : "",
+		"endTime" : null,
+		"type" : "",
+	}
+
+	console.log("-----START MAKE TOOL TIMER-----");
+	fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
+		var data = refresh(userId, data);
+		var timers = data[userId].timers;
+
+
+		var timerCount = timers.count;
+		timerCount++;
+		timers.count = timerCount;
+
+		var newTimerId = "timer" + timerCount;
+		timers[newTimerId] = defaultNewTimer;
+		timers[newTimerId].id = timerCount;
+		timers[newTimerId].oldJob = oldJob;
+		timers[newTimerId].type = "Making "+tool;
+
+		timers[newTimerId].endTime = addSeconds(lastUpdate, seconds);
+
+		var result = JSON.stringify(data,null,4);
+		fs.writeFile(jsonFile, result, function(err) {
+			if (err) {
+				throw err;
+				res.end("Failed to save in makeToolTimer");
+			}
+			console.log('Successfully saved in makeToolTimer');
+		});
+	});
+
+	console.log("-----END MAKE TOOL TIMER-----");
+}
+
+function makeActionTimer(userId, lastUpdate, seconds, action, item, itemQuantity) {
+
+	var defaultNewTimer = {
+		"id" : 0,
+		"endTime" : null,
+		"type" : "",
+		"item" : "",
+		"itemQuantity" : 0
+	}
+
+	console.log("-----START MAKE ACTION TIMER-----");
+	fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
+		var data = refresh(userId, data);
+		var timers = data[userId].timers;
+
+
+		var timerCount = timers.count;
+		timerCount++;
+		timers.count = timerCount;
+
+		var newTimerId = "timer" + timerCount;
+		timers[newTimerId] = defaultNewTimer;
+		timers[newTimerId].id = timerCount;
+		timers[newTimerId].type = action;
+		timers[newTimerId].item = item;
+		timers[newTimerId].itemQuantity = itemQuantity;
+
+		timers[newTimerId].endTime = addSeconds(lastUpdate, seconds);
+
+		var result = JSON.stringify(data,null,4);
+		fs.writeFile(jsonFile, result, function(err) {
+			if (err) {
+				throw err;
+				res.end("Failed to save in makeActionTimer");
+			}
+			console.log('Successfully saved in makeActionTimer');
+		});
+	});
+
+	console.log("-----END MAKE ACTION TIMER-----");
+}
+
+function checkForTimer(user, lastUpdate, currentTime) {
+	console.log("-----START checkForTimer-----");
 	var timers = user.timers
 	var newRefreshTime = null;
-	var currentToolTimer = false;
+	var currentTimer = false;
 
 	for (var tm in timers) {
 		if (!timers.hasOwnProperty(tm) || tm === "count") continue;
 
 		var timer = timers[tm];
-
-		if (timer.type === "Making Hatchet" || timer.type === "Making Pickaxe" || timer.type === "Making Sickle") {
+		// TODO: Simplify to just craft or gather timer check, perhaps remove entirely
+		if (timer.type === "Making Hatchet" || timer.type === "Making Pickaxe" || timer.type === "Making Sickle" || timer.type === "gather") {
 			var timerEndTime = new Date(timer.endTime);
-			currentToolTimer = true;
+			currentTimer = true;
 
 			if (currentTime - timerEndTime > 0) {
+				// TODO: simplify
 				if (timer.type === "Making Hatchet") {
 					user.hatchets += 1;
 				} else if (timer.type === "Making Pickaxe") {
 					user.pickaxes += 1;
 				} else if (timer.type === "Making Sickle") {
 					user.sickles += 1;
+				} else if (timer.item === "berries") {
+					user.berries += timer.itemQuantity;
+				} else if (timer.item === "smallStones") {
+					user.smallStones += timer.itemQuantity;
+				} else if (timer.item === "sticks") {
+					user.sticks += timer.itemQuantity;
 				}
 				newRefreshTime = timerEndTime;
 				timers.count -= 1;
 				// TODO: I may not be deleting the correct timer, especially if I expand this behavior to multiple active timers
 				delete timers[tm];
 				user.currentJob = timer.oldJob;
-				console.log("Tool timer completed, prorating resource update");
+				console.log("Timer completed, prorating resource update");
 			} else {
-				console.log("Tool timer still running, not updating resources");
+				console.log("Timer still running, not updating resources");
 				newRefreshTime = currentTime;
 			}
 			break;
 		}
 	}
 
-	if (currentToolTimer === false) {
-		console.log("No Tool Timer, updating as usual");
-		console.log("-----END checkForToolTimer-----");
+	if (currentTimer === false) {
+		console.log("No Timer, updating as usual");
+		console.log("-----END checkForTimer-----");
 		return lastUpdate;
 	}
-	console.log("-----END checkForToolTimer-----");
+	console.log("-----END checkForTimer-----");
 
 	return newRefreshTime;
 }

@@ -1,34 +1,31 @@
 {
-    "food": {
+    "resources": {
         "berries": {
             "nutrition": 1,
             "timeToExpire": 86400,
-            "volumePerUnit": 0.001
+            "volumePerUnit": 5
         },
         "nuts": {
             "nutrition": 2,
             "timeToExpire": 2000000,
             "baseTimeToCrack": 600,
-            "volumePerUnit": 0.005
-        }
-    },
-    "wood": {
+            "volumePerUnit": 15
+        },
         "sticks": {
-            "volumePerUnit": 0.5
-        }
-    },
-    "stone": {
+            "volumePerUnit": 500,
+            "gatherVolumePerUnit": 20
+        },
         "smallStones": {
-            "volumePerUnit": 0.1
+            "volumePerUnit": 25
         }
     },
     "tools": {
         "storage": {
             "hands": {
-                "capacity": 15
+                "capacity": 100
             },
             "stoneBowl": {
-                "capacity": 45
+                "capacity": 300
             }
         },
         "harvest": {
