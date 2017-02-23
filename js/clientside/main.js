@@ -15,42 +15,38 @@ function prepEvents() {
 	$("#make-hatchet").click({tool: "Hatchet"},makeTool);
 	$("#make-pickaxe").click({tool: "Pickaxe"},makeTool);
 	$("#make-sickle").click({tool: "Sickle"},makeTool);
-	$("#gather-food").click({newJob: "Gather Food"},changeJob);
-	$("#gather-wood").click({newJob: "Gather Wood"},changeJob);
-	$("#gather-stone").click({newJob: "Gather Stone"},changeJob);
+	$("#gather-food").click({newJob: "Gather Food", timer: "gatherFoodTimer", callback: postGather, qtyElement: "food-quantity"},changeJob);
+	$("#gather-wood").click({newJob: "Gather Wood", timer: "gatherWoodTimer", callback: postGather, qtyElement: "wood-quantity"},changeJob);
+	$("#gather-stone").click({newJob: "Gather Stone", timer: "gatherStoneTimer", callback: postGather, qtyElement: "stone-quantity"},changeJob);
 	// TODO: Add use of storage and tool
 	// TODO: Get storage time, and tool efficiency from items.json
-	$("#gather-berries").click({newJob: "Gather Berries", timer: "forageBerriesTimer", timeInSeconds: 2, qtyToIncrease: 10, callback: postGather, qtyElement: "berries-quantity"}, changeJob);
-	$("#gather-smallStones").click({newJob: "Gather Small Stones", timer: "gatherSmallStonesTimer", timeInSeconds: 2, qtyToIncrease: 2, callback: postGather, qtyElement: "smallStones-quantity"}, changeJob);
-	$("#gather-sticks-scavenge").click({newJob: "Gather Sticks", timer: "gatherSticksTimer", timeInSeconds: 3, qtyToIncrease: 3, callback: postGather, qtyElement: "sticks-quantity"}, changeJob);
-	$("#gather-sticks-cut").click({newJob: "Gather Sticks", timer: "gatherSticksTimer", timeInSeconds: 1, qtyToIncrease: 5, callback: postGather, qtyElement: "sticks-quantity"}, changeJob);
+	$("#gather-berries").click({newJob: "Gather Berries", collectedItem: "berries", timer: "forageBerriesTimer", callback: postGather, qtyElement: "berries-quantity"}, changeJob);
+	$("#gather-smallStones").click({newJob: "Gather Small Stones", collectedItem: "smallStones", timer: "gatherSmallStonesTimer", callback: postGather, qtyElement: "smallStones-quantity"}, changeJob);
+	$("#gather-sticks-scavenge").click({newJob: "Gather Sticks", collectedItem: "sticks", timer: "gatherSticksTimer", callback: postGather, qtyElement: "sticks-quantity"}, changeJob);
 }
 
 function changeJob(args) {
 	var newJob = args.data.newJob;
 	var timer = args.data.timer;
-	var time = args.data.timeInSeconds;
 	var callback = args.data.callback;
 	var qtyElement = args.data.qtyElement;
-	var qtyToIncrease = args.data.qtyToIncrease;
+	var collectedItem = args.data.collectedItem;
 	var storageItem = $("#current-storage-item").html();
 	var toolUsed = $("#current-gather-tool").html();
-	$("#previous-job").html($("#current-job").html());
-	$("#current-job").html(newJob);
-	countdown('#'+timer, 0, time, callback, qtyElement, qtyToIncrease);
+	changeJobAjax(newJob, '#'+timer, callback, qtyElement, toolUsed, storageItem, collectedItem);
 }
 
 function makeTool(args) {
 	var tool = args.data.tool;
-	var currentWood = Number($(".wood-counter").html());
-	var currentStone = Number($(".stone-counter").html());
+	var currentWood = Number($("#wood-quantity").html());
+	var currentStone = Number($("#stone-quantity").html());
 	var previousJob = $("#current-job").html();
 	if (currentWood >= 10 && currentStone >= 10 && (previousJob === "Gather Stone" || previousJob === "Gather Food" || previousJob === "Gather Wood")) {
-		$(".wood-counter").html(currentWood -= 10);
-		$(".stone-counter").html(currentStone -= 10);
+		$("#wood-quantity").html(currentWood -= 10);
+		$("#stone-quantity").html(currentStone -= 10);
 		$("#previous-job").html(previousJob);
 		$("#current-job").html("Making "+tool);
-		countdown('#make'+tool+'Timer', 0, 10, makeToolTimer, tool);
+		countdown('#make'+tool+'Timer', 10, makeToolTimer, tool);
 	} else {
 		console.log("Error, cannot make tool in main.js onclick");
 	}

@@ -13,43 +13,43 @@ function updateCounters() {
 
 function updateFoodCounter(updatedFood) {
 	if (updatedFood == null) {
-		var currentCount = Number($(".food-counter").html());
+		var currentCount = Number($("#food-quantity").html());
 		var currentLevel = Number($("#current-level").html());
 		var currentSickles = Number($("#number-of-sickles").html());
 		var currentPopulation = Number($(".population-counter").html());
 		var updatedCount = currentCount += currentLevel * currentPopulation + Math.min(currentSickles, currentPopulation);
-		$(".food-counter").html(updatedCount);
+		$("#food-quantity").html(updatedCount);
 	} else {
 		// console.log("updatedFood: "+updatedFood);
-		$(".food-counter").html(Math.floor(updatedFood));
+		$("#food-quantity").html(Math.floor(updatedFood));
 	}
 }
 
 function updateWoodCounter(updatedWood) {
 	if (updatedWood == null) {
-		var currentCount = Number($(".wood-counter").html());
+		var currentCount = Number($("#wood-quantity").html());
 		var currentLevel = Number($("#current-level").html());
 		var currentHatchets = Number($("#number-of-hatchets").html());
 		var currentPopulation = Number($(".population-counter").html());
 		var updatedCount = currentCount += currentLevel * currentPopulation + Math.min(currentHatchets, currentPopulation);
-		$(".wood-counter").html(updatedCount);
+		$("#wood-quantity").html(updatedCount);
 	} else {
 		// console.log("updatedWood: "+updatedWood);
-		$(".wood-counter").html(Math.floor(updatedWood));
+		$("#wood-quantity").html(Math.floor(updatedWood));
 	}
 }
 
 function updateStoneCounter(updatedStone) {
 	if (updatedStone == null) {
-		var currentCount = Number($(".stone-counter").html());
+		var currentCount = Number($("#stone-quantity").html());
 		var currentLevel = Number($("#current-level").html());
 		var currentPickaxes = Number($("#number-of-pickaxes").html());
 		var currentPopulation = Number($(".population-counter").html());
 		var updatedCount = currentCount += currentLevel * currentPopulation + Math.min(currentPickaxes, currentPopulation);
-		$(".stone-counter").html(updatedCount);
+		$("#stone-quantity").html(updatedCount);
 	} else {
 		// console.log("updatedStone: "+updatedStone);
-		$(".stone-counter").html(Math.floor(updatedStone));
+		$("#stone-quantity").html(Math.floor(updatedStone));
 	}
 
 }

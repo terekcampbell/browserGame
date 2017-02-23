@@ -1,11 +1,11 @@
 function prepAjax() {
 	$("#refresh").click(refresh);
 
-	$("#gather-food").click({newJob: "Gather Food"},changeJobAjax);
+	// $("#gather-food").click({newJob: "Gather Food"},changeJobAjax);
 
-	$("#gather-wood").click({newJob: "Gather Wood"},changeJobAjax);
+	// $("#gather-wood").click({newJob: "Gather Wood"},changeJobAjax);
 
-	$("#gather-stone").click({newJob: "Gather Stone"},changeJobAjax);
+	// $("#gather-stone").click({newJob: "Gather Stone"},changeJobAjax);
 
 	$("#make-hatchet").click({tool: "Hatchet"},makeToolAjax);
 
@@ -43,27 +43,37 @@ function refresh() {
 	});
 }
 
-function changeJobAjax(event) {
+function changeJobAjax(newJob, element, callback, qtyElement, toolUsed, storageItem, collectedItem) {
 	$.ajax({
 		url : 'http://127.0.0.1:8081/changeJob',
 		type : 'GET',
 		data : {
 			"currentUserId" : $("#currentUserId").val(),
-			"newJob" : event.data.newJob
+			"newJob" : newJob,
+			"toolUsed" : toolUsed,
+			"storageItem" : storageItem,
+			"collectedItem" : collectedItem
 		},
-		success : function(text) {
-			console.log(text);
+		success : function(jsonResponse) {
+			var jsonResponse = JSON.parse(jsonResponse);
+			var time = jsonResponse.time;
+			var amountCollected = jsonResponse.capacity;
+
+			console.log("Success in changeJobAjax");
+			$("#previous-job").html($("#current-job").html());
+			$("#current-job").html(newJob);
+			countdown(element, time, callback, qtyElement, amountCollected);
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
-			console.log("There was an error with the 'changeJob: "+event.data.newJob+"' AJAX request");
+			console.log("There was an error with the 'changeJob: "+newJob+"' AJAX request");
 		},
 	});
 }
 
 function makeToolAjax(args) {
 	var tool = args.data.tool;
-	var currentWood = Number($(".wood-counter").html());
-	var currentStone = Number($(".stone-counter").html());
+	var currentWood = Number($("#wood-quantity").html());
+	var currentStone = Number($("#stone-quantity").html());
 	var previousJob = $("#current-job").html();
 	if (currentWood >= 10 && currentStone >= 10 && (previousJob === "Gather Stone" || previousJob === "Gather Food" || previousJob === "Gather Wood")) {
 		$.ajax({

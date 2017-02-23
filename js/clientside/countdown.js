@@ -1,7 +1,7 @@
-function countdown(element, minutes, seconds, nextFunc, nextFuncArg1, nextFuncArg2) {
+function countdown(element, seconds, nextFunc, nextFuncArg1, nextFuncArg2) {
     $(element).css("display","block");
-    if(minutes > 0) {
-        var minute_text = minutes + (minutes > 1 ? ' minutes' : ' minute');
+    if(seconds > 59) {
+        var minute_text = Math.floor(seconds/60) + (seconds > 119 ? ' minutes' : ' minute');
     } else {
         var minute_text = '';
     }
@@ -11,19 +11,15 @@ function countdown(element, minutes, seconds, nextFunc, nextFuncArg1, nextFuncAr
     seconds--;
 
     var interval = setInterval(function() {
-        if(seconds == 0) {
-            if(minutes == 0) {
-                $(element).css("display","none");
-                clearInterval(interval);
-                return nextFunc(nextFuncArg1, nextFuncArg2);
-            } else {
-                minutes--;
-                seconds = 60;
-            }
+        console.log(seconds);
+        if(seconds <= 0) {
+            $(element).css("display","none");
+            clearInterval(interval);
+            return nextFunc(nextFuncArg1, nextFuncArg2);
         }
 
-        if(minutes > 0) {
-            minute_text = minutes + (minutes > 1 ? ' minutes' : ' minute');
+        if(seconds > 59) {
+            minute_text = Math.floor(seconds/60) + (seconds > 119 ? ' minutes' : ' minute');
         } else {
             minute_text = '';
         }

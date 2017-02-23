@@ -166,21 +166,37 @@ app.get('/changeJob', function (req, res) {
 	console.log(req.query.newJob);
 	var userId = req.query.currentUserId;
 	var newJob = req.query.newJob;
+	var collectedItem = req.query.collectedItem;
+	var toolUsed = req.query.toolUsed;
+	var storageItem = req.query.storageItem;
 
-	fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
-		var data = refresh(userId, data);
-		data[userId].currentJob = newJob;
+	fs.readFile( __dirname + "/" + "users.json", 'utf8', function (usersErr, usersData) {
+		var usersData = refresh(userId, usersData);
+		usersData[userId].currentJob = newJob;
+		var result = JSON.stringify(usersData,null,4);
 
-		var result = JSON.stringify(data,null,4);
-		fs.writeFile(jsonFile, result, function(err) {
-			if (err) {
-				throw err;
-				res.end("Failed to change job");
-			}
-			console.log('Job changed successfully');
+		fs.readFile( __dirname + "/" + "items.json", 'utf8', function (itemsErr, itemsJSON) {
+			var itemsData = JSON.parse(itemsJSON);
+			var speedMultiplier = itemsData.tools.harvest[toolUsed].speedMultiplier;
+			var capacity = itemsData.tools.storage[toolUsed].capacity;
+			var amountPerSecond = itemsData.actions.gathering[collectedItem].baseAmountPerSecond;
+			var maxTime = Math.floor(capacity/(amountPerSecond*speedMultiplier));
+			// TODO: Add timer for job
+			response = {
+				time:maxTime,
+				capacity:capacity
+			};
+
+			fs.writeFile(jsonFile, result, function(writeErr) {
+				if (writeErr) {
+					throw writeErr;
+					res.end("Failed to change job");
+				}
+				console.log('Job changed successfully');
+			});
+			console.log("-----END CHANGE JOB-----");
+			res.end(JSON.stringify(response));
 		});
-		console.log("-----END CHANGE JOB-----");
-		res.end("Job received");
 	});
 })
 
