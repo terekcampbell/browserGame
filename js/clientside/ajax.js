@@ -4,6 +4,8 @@ function prepAjax() {
 	$("#explore").click(explore);	
 
 	$("#new-user-submit").click(createNewUser);	
+
+	$("#reset-db").click(resetDb);	
 }
 
 function refresh() {
@@ -89,6 +91,19 @@ function createNewUser() {
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
 			console.log("There was an error with the 'createNewUser' AJAX request");
+		}
+	});
+}
+
+function resetDb() {
+	$.ajax({
+		url : 'http://127.0.0.1:8081/reset',
+		type : 'GET',
+		success : function(text) {
+			console.log(text);
+		},
+		error : function(jqXHR, textStatus, errorThrown) {
+			console.log("There was an error with the 'resetDb' AJAX request");
 		}
 	});
 }
