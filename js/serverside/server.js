@@ -15,19 +15,11 @@ app.use(function(req, res, next) {
 var usersFile = __dirname + "/" + "users.json";
 var itemsFile = __dirname + "/" + "items.json";
 
-var defaultNewUser = {
-	"currentStorageItem" : "hands",
-	"currentGatherTool" : "hands",
-	"hands" : 1,
-	"currentJob" : "No Current Job",
-	"timers" : {
-		"count" : 0,
-	}
-}
-
-var dbReset = {
-    "userCount": 0
-}
+var server = app.listen(8081, function () {
+  var host = server.address().address
+  var port = server.address().port
+  console.log("Example app listening at http://%s:%s", host, port)
+})
 
 app.get('/', function (req, res) {
 	fs.readFile(usersFile, 'utf8', function (err, data) {
@@ -54,55 +46,6 @@ app.get('/refresh', function (req, res) {
 		res.end(JSON.stringify(data[userId],null,4));
 	});
 })
-
-// app.get('/makeTool', function (req, res) {
-// 	console.log("-----START MAKE TOOL-----");
-// 	var userId = req.query.currentUserId;
-// 	var tool = req.query.tool;
-
-// 	fs.readFile(usersFile, 'utf8', function (err, data) {
-// 		var data = refresh(userId, data);
-// 		console.log("-----MAKE TOOL AFTER REFRESH-----");
-// 		var user = data[userId];
-// 		var timers = user.timers
-
-// 		var currentToolTimer = false;
-// 		for (var tm in timers) {
-// 			if (!timers.hasOwnProperty(tm) || tm === "count") continue;
-
-// 			var timer = timers[tm];
-
-// 			console.log("timer info: ", timer);
-// 			if (timer.type === "gather") {
-// 				currentTimer = true;
-// 				break;
-// 			}
-// 		}
-// 		if (currentTimer === true) {
-// 			var message = "Already have a timer, not creating new one";
-// 			console.log(message);
-// 			res.end(message);
-// 			return;
-// 		}
-
-// 		oldJob = user.currentJob;
-// 		// TODO: Probabably need to change this text
-// 		user.currentJob = "Making "+tool;
-// 		makeToolTimer(userId, user.lastUpdate, oldJob, 10, tool);
-
-// 		var result = JSON.stringify(data,null,4);
-// 		fs.writeFile(usersFile, result, function(err) {
-// 			if (err) {
-// 				throw err;
-// 				res.end("Failed to save created ", tool);
-// 			}
-// 			console.log(tool,"creation saved successfully");
-// 		});
-// 		console.log("-----END MAKE TOOL-----");
-
-// 		res.end(JSON.stringify(user,null,4));
-// 	});
-// })
 
 app.get('/explore', function (req, res) {
 	res.end("Finished Exploring");
@@ -159,8 +102,19 @@ app.get('/changeJob', function (req, res) {
 		});
 	});
 })
-// TODO: Fix browser console error when creating new user
+
 app.get('/addUser', function (req, res) {
+
+	var defaultNewUser = {
+		"currentStorageItem" : "hands",
+		"currentGatherTool" : "hands",
+		"hands" : 1,
+		"currentJob" : "No Current Job",
+		"timers" : {
+			"count" : 0,
+		}
+	}
+
 	fs.readFile( usersFile, 'utf8', function (err, data) {
 		var data = JSON.parse(data);
 		var userCount = data.userCount;
@@ -201,6 +155,11 @@ app.get('/addUser', function (req, res) {
 })
 
 app.get('/reset', function (req, res) {
+
+	var dbReset = {
+	    "userCount": 0
+	}
+
 	fs.writeFile(usersFile, JSON.stringify(dbReset,null,4), function(err) {
 		if (err) {
 			throw err;
@@ -209,12 +168,6 @@ app.get('/reset', function (req, res) {
 		console.log('Reset DB successfully');
 		res.end("Reset DB successfully");
 	});
-})
-
-var server = app.listen(8081, function () {
-  var host = server.address().address
-  var port = server.address().port
-  console.log("Example app listening at http://%s:%s", host, port)
 })
 
 function refresh(userId, data) {
@@ -283,15 +236,6 @@ function makeActionTimer(res, userId, lastUpdate, seconds, action, item, itemQua
 
 	timers[newTimerId].endTime = addSeconds(lastUpdate, seconds);
 
-	// var result = JSON.stringify(data,null,4);
-	// fs.writeFile(usersFile, result, function(err) {
-	// 	if (err) {
-	// 		throw err;
-	// 		res.end("Failed to save in makeActionTimer");
-	// 	}
-	// 	console.log('Successfully saved in makeActionTimer');
-	// });
-
 	console.log("-----END MAKE ACTION TIMER-----");
 
 	return data;
@@ -311,17 +255,7 @@ function checkForTimer(user, lastUpdate, currentTime) {
 		currentTimer = true;
 
 		if (currentTime - timerEndTime > 0) {
-			// TODO: simplify
-			// if (timer.item === "berries") {
-			// 	user.berries += timer.itemQuantity;
-				user[timer.item] += timer.itemQuantity;
-			// } else if (timer.item === "smallStones") {
-			// 	user.smallStones += timer.itemQuantity;
-			// } else if (timer.item === "sticks") {
-			// 	user.sticks += timer.itemQuantity;
-			// } else if (timer.item === "knockedStone") {
-			// 	user.knockedStones += timer.itemQuantity;
-			// }
+			user[timer.item] += timer.itemQuantity;
 			newRefreshTime = timerEndTime;
 			timers.count -= 1;
 			// TODO: I may not be deleting the correct timer, especially if I expand this behavior to multiple active timers
