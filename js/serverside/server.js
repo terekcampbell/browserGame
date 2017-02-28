@@ -160,7 +160,7 @@ app.get('/changeJob', function (req, res) {
 	});
 })
 // TODO: Fix browser console error when creating new user
-app.post('/addUser', function (req, res) {
+app.get('/addUser', function (req, res) {
 	fs.readFile( usersFile, 'utf8', function (err, data) {
 		var data = JSON.parse(data);
 		var userCount = data.userCount;

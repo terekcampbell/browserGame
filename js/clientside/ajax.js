@@ -2,6 +2,8 @@ function prepAjax() {
 	$("#refresh").click(refresh);
 
 	$("#explore").click(explore);	
+
+	$("#new-user-submit").click(createNewUser);	
 }
 
 function refresh() {
@@ -58,11 +60,11 @@ function changeJobAjax(jobType, element, callback, qtyElement, toolUsed, storage
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
 			console.log("There was an error with the 'changeJob: "+jobText+"' AJAX request");
-		},
+		}
 	});
 }
 
-function explore () {
+function explore() {
 	$.ajax({
 		url : 'http://127.0.0.1:8081/explore',
 		type : 'GET',
@@ -71,7 +73,23 @@ function explore () {
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
 			console.log("There was an error with the 'explore' AJAX request");
-		},
+		}
 	});
-
 }
+
+function createNewUser() {
+	$.ajax({
+		url : 'http://127.0.0.1:8081/addUser',
+		type : 'GET',
+		data : {
+			"name" : $("#new-user-name").val()
+		},
+		success : function(text) {
+			console.log(text);
+		},
+		error : function(jqXHR, textStatus, errorThrown) {
+			console.log("There was an error with the 'createNewUser' AJAX request");
+		}
+	});
+}
+
