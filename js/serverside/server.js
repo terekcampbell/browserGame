@@ -1,5 +1,5 @@
 var express = require('express');
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
 var fs = require("fs");
 
 var app = express();
@@ -12,19 +12,23 @@ app.use(function(req, res, next) {
   next();
 });
 
-var jsonFile = __dirname + "/" + "users.json";
+var usersFile = __dirname + "/" + "users.json";
+var itemsFile = __dirname + "/" + "items.json";
 
 // TODO: Generate based on items.json
 var defaultNewUser = {
+	"currentStorageItem" : "hands",
+	"currentGatherTool" : "hands",
 	"berries" : 0,
 	"smallStones" : 0,
 	"sticks" : 0,
+	"knockedStones" : 0,
+	"stoneBowls" : 0,
 	"hands" : 1,
-	"stoneBowl" : 0,
 	"currentJob" : "No Current Job",
 	"timers" : {
 		"count" : 0,
-	},
+	}
 }
 
 var dbReset = {
@@ -32,7 +36,7 @@ var dbReset = {
 }
 
 app.get('/', function (req, res) {
-	fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
+	fs.readFile(usersFile, 'utf8', function (err, data) {
 		res.writeHead(200, {'Content-Type': 'application/json'})
 		res.end(data);
 	});
@@ -41,11 +45,11 @@ app.get('/', function (req, res) {
 app.get('/refresh', function (req, res) {
 	var userId = req.query.currentUserId;
 
-	fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
+	fs.readFile(usersFile, 'utf8', function (err, data) {
 		var data = refresh(userId, data);
 		var result = JSON.stringify(data,null,4);
 
-		fs.writeFile(jsonFile, result, function(err) {
+		fs.writeFile(usersFile, result, function(err) {
 			if (err) {
 				throw err;
 				res.end("Failed to save user");
@@ -62,7 +66,7 @@ app.get('/makeTool', function (req, res) {
 	var userId = req.query.currentUserId;
 	var tool = req.query.tool;
 
-	fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
+	fs.readFile(usersFile, 'utf8', function (err, data) {
 		var data = refresh(userId, data);
 		console.log("-----MAKE TOOL AFTER REFRESH-----");
 		var user = data[userId];
@@ -93,7 +97,7 @@ app.get('/makeTool', function (req, res) {
 		makeToolTimer(userId, user.lastUpdate, oldJob, 10, tool);
 
 		var result = JSON.stringify(data,null,4);
-		fs.writeFile(jsonFile, result, function(err) {
+		fs.writeFile(usersFile, result, function(err) {
 			if (err) {
 				throw err;
 				res.end("Failed to save created ", tool);
@@ -107,40 +111,45 @@ app.get('/makeTool', function (req, res) {
 })
 
 app.get('/explore', function (req, res) {
-
 	res.end("Finished Exploring");
 })
 
 app.get('/changeJob', function (req, res) {
 	console.log("-----START CHANGE JOB-----");
-	console.log(req.query.newJob);
 	var userId = req.query.currentUserId;
-	var newJob = req.query.newJob;
+	var jobType = req.query.jobType;
 	var collectedItem = req.query.collectedItem;
 	var toolUsed = req.query.toolUsed;
 	var storageItem = req.query.storageItem;
-
-	fs.readFile( __dirname + "/" + "users.json", 'utf8', function (usersErr, usersData) {
+	// TODO: Make these readFile calls asynchronous
+	fs.readFile(usersFile, 'utf8', function (usersErr, usersData) {
 		var usersData = refresh(userId, usersData);
 		var lastUpdate = usersData[userId].lastUpdate;
-		usersData[userId].currentJob = newJob;
-		var result = JSON.stringify(usersData,null,4);
+		usersData[userId].currentJob = jobType.concat(" ").concat(collectedItem);
 
-		fs.readFile( __dirname + "/" + "items.json", 'utf8', function (itemsErr, itemsJSON) {
+		fs.readFile(itemsFile, 'utf8', function (itemsErr, itemsJSON) {
 			var itemsData = JSON.parse(itemsJSON);
-			var speedMultiplier = itemsData.tools.harvest[toolUsed].speedMultiplier;
-			var capacity = itemsData.tools.storage[toolUsed].capacity;
-			var amountPerSecond = itemsData.actions.gathering[collectedItem].baseAmountPerSecond;
-			var volumePerUnit = itemsData.resources[collectedItem].gatherVolumePerUnit;
-			if (volumePerUnit == undefined) {
-				volumePerUnit = itemsData.resources[collectedItem].volumePerUnit;
+			if (jobType === "gather") {
+				var speedMultiplier = itemsData.tools.harvest[toolUsed].speedMultiplier;
+				var capacity = itemsData.tools.storage[toolUsed].capacity;
+				var amountPerSecond = itemsData.actions.gathering[collectedItem].baseAmountPerSecond;
+				var volumePerUnit = itemsData.resources[collectedItem].gatherVolumePerUnit;
+				if (volumePerUnit == undefined) {
+					volumePerUnit = itemsData.resources[collectedItem].volumePerUnit;
+				}
+				var amountCollected = capacity/volumePerUnit;
+				var totalTime = Math.floor(amountCollected/(amountPerSecond*speedMultiplier));
+			} else if (jobType === "craft") {
+				var baseTimeToCraft = itemsData.actions.crafting[collectedItem].baseCraftTime;
+				var amountCollected = itemsData.actions.crafting[collectedItem].baseNumberCrafted;
+				var totalTime = baseTimeToCraft;
 			}
-			var amountCollected = capacity/volumePerUnit;
-			var maxTime = Math.floor(amountCollected/(amountPerSecond*speedMultiplier));
-			// TODO: make actionType dynamic
-			makeActionTimer(userId, lastUpdate, maxTime, "gather", collectedItem, amountCollected);
+			console.log("Before makeActionTimer");
+			usersData = makeActionTimer(res, userId, lastUpdate, totalTime, jobType, collectedItem, amountCollected, usersData);
 
-			fs.writeFile(jsonFile, result, function(writeErr) {
+			var result = JSON.stringify(usersData,null,4);
+
+			fs.writeFile(usersFile, result, function(writeErr) {
 				if (writeErr) {
 					throw writeErr;
 					res.end("Failed to change job");
@@ -149,16 +158,16 @@ app.get('/changeJob', function (req, res) {
 			});
 			console.log("-----END CHANGE JOB-----");
 			response = {
-				time:maxTime,
+				time:totalTime,
 				amountCollected:amountCollected
 			};
 			res.end(JSON.stringify(response));
 		});
 	});
 })
-
+// TODO: Fix browser console error when creating new user
 app.post('/addUser', function (req, res) {
-	fs.readFile( jsonFile, 'utf8', function (err, data) {
+	fs.readFile( usersFile, 'utf8', function (err, data) {
 		var data = JSON.parse(data);
 		var userCount = data.userCount;
 		userCount++;
@@ -175,7 +184,7 @@ app.post('/addUser', function (req, res) {
 
 
 		var result = JSON.stringify(data,null,4);
-		fs.writeFile(jsonFile, result, function(err) {
+		fs.writeFile(usersFile, result, function(err) {
 			if (err) {
 				throw err;
 				res.end("Failed to save user");
@@ -187,7 +196,7 @@ app.post('/addUser', function (req, res) {
 })
 
 app.get('/reset', function (req, res) {
-	fs.writeFile(jsonFile, JSON.stringify(dbReset,null,4), function(err) {
+	fs.writeFile(usersFile, JSON.stringify(dbReset,null,4), function(err) {
 		if (err) {
 			throw err;
 			res.end("Failed to reset DB");
@@ -209,16 +218,13 @@ function refresh(userId, data) {
 		var data = JSON.parse(data);
 		var user = data[userId];
 
-		// console.log("Current User ID: " + userId);
-
-		var lastUpdate = new Date(data[userId].lastUpdate);
 		var currentTime = new Date();
-		var updatedRefreshDate = checkForTimer(user, lastUpdate, currentTime);
-		var mult = (currentTime - updatedRefreshDate)/1000;
-		// console.log("Time difference in seconds: " + mult);
 
-		var job = user.currentJob;
-		// console.log("Current Job: " + job);
+		 var lastUpdate = new Date(data[userId].lastUpdate);
+		// var updatedRefreshDate = checkForTimer(user, lastUpdate, currentTime);
+		checkForTimer(user, lastUpdate, currentTime);
+		// var mult = (currentTime - updatedRefreshDate)/1000;
+		// var job = user.currentJob;
 
 		user.lastUpdate = currentTime;
 		console.log("-----END REFRESH-----");
@@ -230,47 +236,7 @@ function addSeconds(date, seconds) {
     return new Date(date.getTime() + seconds*1000);
 }
 
-function makeToolTimer(userId, lastUpdate, oldJob, seconds, tool) {
-
-	var defaultNewTimer = {
-		"id" : 0,
-		"oldJob" : "",
-		"endTime" : null,
-		"type" : "",
-	}
-
-	console.log("-----START MAKE TOOL TIMER-----");
-	fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
-		var data = refresh(userId, data);
-		var timers = data[userId].timers;
-
-
-		var timerCount = timers.count;
-		timerCount++;
-		timers.count = timerCount;
-
-		var newTimerId = "timer" + timerCount;
-		timers[newTimerId] = defaultNewTimer;
-		timers[newTimerId].id = timerCount;
-		timers[newTimerId].oldJob = oldJob;
-		timers[newTimerId].type = "Making "+tool;
-
-		timers[newTimerId].endTime = addSeconds(lastUpdate, seconds);
-
-		var result = JSON.stringify(data,null,4);
-		fs.writeFile(jsonFile, result, function(err) {
-			if (err) {
-				throw err;
-				res.end("Failed to save in makeToolTimer");
-			}
-			console.log('Successfully saved in makeToolTimer');
-		});
-	});
-
-	console.log("-----END MAKE TOOL TIMER-----");
-}
-
-function makeActionTimer(userId, lastUpdate, seconds, action, item, itemQuantity) {
+function makeActionTimer(res, userId, lastUpdate, seconds, action, item, itemQuantity, data) {
 
 	var defaultNewTimer = {
 		"id" : 0,
@@ -281,35 +247,49 @@ function makeActionTimer(userId, lastUpdate, seconds, action, item, itemQuantity
 	}
 
 	console.log("-----START MAKE ACTION TIMER-----");
-	fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
-		var data = refresh(userId, data);
-		var timers = data[userId].timers;
 
+	var timers = data[userId].timers;
 
-		var timerCount = timers.count;
-		timerCount++;
-		timers.count = timerCount;
+	var user = data[userId];
+	var currentTime = new Date();
+	var lastUpdate = new Date(data[userId].lastUpdate);
 
-		var newTimerId = "timer" + timerCount;
-		timers[newTimerId] = defaultNewTimer;
-		timers[newTimerId].id = timerCount;
-		timers[newTimerId].type = action;
-		timers[newTimerId].item = item;
-		timers[newTimerId].itemQuantity = itemQuantity;
+	var newRefreshTime = checkForTimer(user, lastUpdate, currentTime);
+	console.log("newRefreshTime: "+newRefreshTime);
 
-		timers[newTimerId].endTime = addSeconds(lastUpdate, seconds);
+	if (newRefreshTime !== lastUpdate) {
+		console.log("A timer already exists, not creating new one");
+		// TODO: Am I sure I want to send the response here?
+		res.end("Existing Timer Error");
+		console.log("-----END MAKE ACTION TIMER-----");
+		return data;
+	}
 
-		var result = JSON.stringify(data,null,4);
-		fs.writeFile(jsonFile, result, function(err) {
-			if (err) {
-				throw err;
-				res.end("Failed to save in makeActionTimer");
-			}
-			console.log('Successfully saved in makeActionTimer');
-		});
-	});
+	var timerCount = timers.count;
+	timerCount++;
+	timers.count = timerCount;
+
+	var newTimerId = "timer" + timerCount;
+	timers[newTimerId] = defaultNewTimer;
+	timers[newTimerId].id = timerCount;
+	timers[newTimerId].type = action;
+	timers[newTimerId].item = item;
+	timers[newTimerId].itemQuantity = itemQuantity;
+
+	timers[newTimerId].endTime = addSeconds(lastUpdate, seconds);
+
+	// var result = JSON.stringify(data,null,4);
+	// fs.writeFile(usersFile, result, function(err) {
+	// 	if (err) {
+	// 		throw err;
+	// 		res.end("Failed to save in makeActionTimer");
+	// 	}
+	// 	console.log('Successfully saved in makeActionTimer');
+	// });
 
 	console.log("-----END MAKE ACTION TIMER-----");
+
+	return data;
 }
 
 function checkForTimer(user, lastUpdate, currentTime) {
@@ -322,32 +302,32 @@ function checkForTimer(user, lastUpdate, currentTime) {
 		if (!timers.hasOwnProperty(tm) || tm === "count") continue;
 
 		var timer = timers[tm];
-		// TODO: Perhaps remove entirely
-		if (timer.type === "gather") {
-			var timerEndTime = new Date(timer.endTime);
-			currentTimer = true;
+		var timerEndTime = new Date(timer.endTime);
+		currentTimer = true;
 
-			if (currentTime - timerEndTime > 0) {
-				// TODO: simplify
-				if (timer.item === "berries") {
-					user.berries += timer.itemQuantity;
-				} else if (timer.item === "smallStones") {
-					user.smallStones += timer.itemQuantity;
-				} else if (timer.item === "sticks") {
-					user.sticks += timer.itemQuantity;
-				}
-				newRefreshTime = timerEndTime;
-				timers.count -= 1;
-				// TODO: I may not be deleting the correct timer, especially if I expand this behavior to multiple active timers
-				delete timers[tm];
-				user.currentJob = timer.oldJob;
-				console.log("Timer completed, prorating resource update");
-			} else {
-				console.log("Timer still running, not updating resources");
-				newRefreshTime = currentTime;
-			}
-			break;
+		if (currentTime - timerEndTime > 0) {
+			// TODO: simplify
+			// if (timer.item === "berries") {
+			// 	user.berries += timer.itemQuantity;
+				user[timer.item] += timer.itemQuantity;
+			// } else if (timer.item === "smallStones") {
+			// 	user.smallStones += timer.itemQuantity;
+			// } else if (timer.item === "sticks") {
+			// 	user.sticks += timer.itemQuantity;
+			// } else if (timer.item === "knockedStone") {
+			// 	user.knockedStones += timer.itemQuantity;
+			// }
+			newRefreshTime = timerEndTime;
+			timers.count -= 1;
+			// TODO: I may not be deleting the correct timer, especially if I expand this behavior to multiple active timers
+			delete timers[tm];
+			user.currentJob = timer.oldJob;
+			console.log("Timer completed, prorating resource update");
+		} else {
+			console.log("Timer still running, not updating resources");
+			newRefreshTime = currentTime;
 		}
+		break;
 	}
 
 	if (currentTimer === false) {

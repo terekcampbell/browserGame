@@ -43,9 +43,7 @@
 			<div class="sticks">
 				<span class="resource-title">Stick</span>
 				<span class="resource-value" id="sticks-quantity">0</span>
-				<button type="button" id="gather-sticks-scavenge">Scavenge For Stick</button>
-				<!-- TODO: Add requirement to have appropriate tool -->
-				<button type="button" id="gather-sticks-cut">Cut sticks from trees</button>
+				<button type="button" id="gather-sticks">Gather Stick</button>
 				<div id='gatherSticksTimer'></div>
 			</div>
 		</div>
@@ -53,9 +51,9 @@
 			<h3>Crafting</h3>
 			<div class="knocked-stone">
 				<span class="resource-title">Knocked Stones</span>
-				<span id="number-of-knockedstones" class="item-value">0</span>
-				<button type="button" id="make-knockedstone">Knock Stone to make sharp</button>
-				<div id='makeKnockedStoneTimer'></div>
+				<span id="knockedStones-quantity" class="item-value">0</span>
+				<button type="button" id="craft-knockedStone">Knock Stone to make sharp</button>
+				<div id='craftKnockedStoneTimer'></div>
 			</div>
 		</div>
 		<div class="explore">
@@ -75,7 +73,7 @@
 				<div>No extra rooms</div>
 			</div>
 		</div>
-
+		<!-- TODO: Use ajax -->
 		<b>New user Creation form:</b>
 		<form action="http://127.0.0.1:8081/addUser" method="post">
 			Name: 

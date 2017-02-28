@@ -30,9 +30,9 @@
         },
         "harvest": {
             "hands": {
-                "speedMultiplier": 50
+                "speedMultiplier": 10
             },
-            "stoneSickle": {
+            "knockedStones": {
                 "speedMultiplier": 1.2
             }
         }
@@ -50,6 +50,16 @@
             },
             "sticks": {
                 "baseAmountPerSecond": 0.2
+            }
+        },
+        "crafting": {
+            "knockedStones": {
+                "baseCraftTime": 2,
+                "baseNumberCrafted": 1
+            },
+            "stoneBowl": {
+                "baseCraftTime": 2,
+                "baseNumberCrafted": 1
             }
         }
     }
