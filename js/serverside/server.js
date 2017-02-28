@@ -15,15 +15,9 @@ app.use(function(req, res, next) {
 var usersFile = __dirname + "/" + "users.json";
 var itemsFile = __dirname + "/" + "items.json";
 
-// TODO: Generate based on items.json
 var defaultNewUser = {
 	"currentStorageItem" : "hands",
 	"currentGatherTool" : "hands",
-	"berries" : 0,
-	"smallStones" : 0,
-	"sticks" : 0,
-	"knockedStones" : 0,
-	"stoneBowls" : 0,
 	"hands" : 1,
 	"currentJob" : "No Current Job",
 	"timers" : {
@@ -61,54 +55,54 @@ app.get('/refresh', function (req, res) {
 	});
 })
 
-app.get('/makeTool', function (req, res) {
-	console.log("-----START MAKE TOOL-----");
-	var userId = req.query.currentUserId;
-	var tool = req.query.tool;
+// app.get('/makeTool', function (req, res) {
+// 	console.log("-----START MAKE TOOL-----");
+// 	var userId = req.query.currentUserId;
+// 	var tool = req.query.tool;
 
-	fs.readFile(usersFile, 'utf8', function (err, data) {
-		var data = refresh(userId, data);
-		console.log("-----MAKE TOOL AFTER REFRESH-----");
-		var user = data[userId];
-		var timers = user.timers
+// 	fs.readFile(usersFile, 'utf8', function (err, data) {
+// 		var data = refresh(userId, data);
+// 		console.log("-----MAKE TOOL AFTER REFRESH-----");
+// 		var user = data[userId];
+// 		var timers = user.timers
 
-		var currentToolTimer = false;
-		for (var tm in timers) {
-			if (!timers.hasOwnProperty(tm) || tm === "count") continue;
+// 		var currentToolTimer = false;
+// 		for (var tm in timers) {
+// 			if (!timers.hasOwnProperty(tm) || tm === "count") continue;
 
-			var timer = timers[tm];
+// 			var timer = timers[tm];
 
-			console.log("timer info: ", timer);
-			if (timer.type === "gather") {
-				currentTimer = true;
-				break;
-			}
-		}
-		if (currentTimer === true) {
-			var message = "Already have a timer, not creating new one";
-			console.log(message);
-			res.end(message);
-			return;
-		}
+// 			console.log("timer info: ", timer);
+// 			if (timer.type === "gather") {
+// 				currentTimer = true;
+// 				break;
+// 			}
+// 		}
+// 		if (currentTimer === true) {
+// 			var message = "Already have a timer, not creating new one";
+// 			console.log(message);
+// 			res.end(message);
+// 			return;
+// 		}
 
-		oldJob = user.currentJob;
-		// TODO: Probabably need to change this text
-		user.currentJob = "Making "+tool;
-		makeToolTimer(userId, user.lastUpdate, oldJob, 10, tool);
+// 		oldJob = user.currentJob;
+// 		// TODO: Probabably need to change this text
+// 		user.currentJob = "Making "+tool;
+// 		makeToolTimer(userId, user.lastUpdate, oldJob, 10, tool);
 
-		var result = JSON.stringify(data,null,4);
-		fs.writeFile(usersFile, result, function(err) {
-			if (err) {
-				throw err;
-				res.end("Failed to save created ", tool);
-			}
-			console.log(tool,"creation saved successfully");
-		});
-		console.log("-----END MAKE TOOL-----");
+// 		var result = JSON.stringify(data,null,4);
+// 		fs.writeFile(usersFile, result, function(err) {
+// 			if (err) {
+// 				throw err;
+// 				res.end("Failed to save created ", tool);
+// 			}
+// 			console.log(tool,"creation saved successfully");
+// 		});
+// 		console.log("-----END MAKE TOOL-----");
 
-		res.end(JSON.stringify(user,null,4));
-	});
-})
+// 		res.end(JSON.stringify(user,null,4));
+// 	});
+// })
 
 app.get('/explore', function (req, res) {
 	res.end("Finished Exploring");
@@ -183,14 +177,25 @@ app.post('/addUser', function (req, res) {
 		data.userCount = userCount;
 
 
-		var result = JSON.stringify(data,null,4);
-		fs.writeFile(usersFile, result, function(err) {
-			if (err) {
-				throw err;
-				res.end("Failed to save user");
+		fs.readFile(itemsFile, 'utf8', function (itemsErr, itemsJSON) {
+			var itemsData = JSON.parse(itemsJSON);
+
+			for (var resource in itemsData.resources) {
+				data[newUserId][resource] = 0;
 			}
-			console.log('User saved successfully');
-			res.end("User created successfully");
+			for (var item in itemsData.actions.crafting) {
+				data[newUserId][item] = 0;
+			}
+
+			var result = JSON.stringify(data,null,4);
+			fs.writeFile(usersFile, result, function(err) {
+				if (err) {
+					throw err;
+					res.end("Failed to save user");
+				}
+				console.log('User saved successfully');
+				res.end("User created successfully");
+			});
 		});
 	});
 })
