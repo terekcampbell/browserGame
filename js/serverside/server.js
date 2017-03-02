@@ -297,6 +297,7 @@ function checkForTimer(user, lastUpdate, currentTime) {
 				// TODO: Add max proficiency cap
 				var proficiency = user[timer.item].proficiency;
 				user[timer.item].qualities.push(proficiency);
+				// TODO: Pull the 0.1 from items.json
 				user[timer.item].proficiency = Number((proficiency + 0.1*(100-proficiency)).toFixed(2));
 			} else {
 				user[timer.item] += timer.itemQuantity;
