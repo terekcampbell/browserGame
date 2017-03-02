@@ -30,10 +30,14 @@
         },
         "harvest": {
             "hands": {
-                "speedMultiplier": 10
+                "speedMultiplier": 50,
+                "maxQuality": 100,
+                "baseQuality": 100
             },
             "knockedStones": {
-                "speedMultiplier": 1.2
+                "speedMultiplier": 1.2,
+                "maxQuality": 80,
+                "baseQuality": 10
             }
         }
     },
@@ -55,11 +59,17 @@
         "crafting": {
             "knockedStones": {
                 "baseCraftTime": 2,
-                "baseNumberCrafted": 1
+                "baseNumberCrafted": 1,
+                "resources": {
+                    "smallStones": 1
+                }
             },
             "stoneBowls": {
                 "baseCraftTime": 2,
-                "baseNumberCrafted": 1
+                "baseNumberCrafted": 1,
+                "resources": {
+                    "smallStones": 10
+                }
             }
         }
     }

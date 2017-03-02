@@ -25,6 +25,7 @@ function refresh() {
 			$("#smallStones-quantity").html(data.smallStones);
 			$("#sticks-quantity").html(data.sticks);
 			$("#knockedStones-quantity").html(data.knockedStones);
+			$("#stoneBowls-quantity").html(data.stoneBowls);
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
 			console.log("There was an error with the 'refresh' AJAX request");
@@ -46,14 +47,19 @@ function changeJobAjax(jobType, element, callback, qtyElement, toolUsed, storage
 			"collectedItem" : collectedItem
 		},
 		success : function(response) {
-			console.log("response: "+response);
-			if (response === "Existing Timer Error") {
+			if (response === "Existing Timer Error" || response === "Insufficient Resources Error") {
 				console.log("Failure in changeJobAjax: " + response);
 				return;
 			}
 			var jsonResponse = JSON.parse(response);
 			var time = jsonResponse.time;
 			var amountCollected = jsonResponse.amountCollected;
+			var resourcesSpent = jsonResponse.resourcesSpent;
+			// TODO: Make more general
+
+			$("#smallStones-quantity").html(Number($("#smallStones-quantity").html())-resourcesSpent.smallStones);
+
+
 
 			console.log("Success in changeJobAjax");
 			$("#previous-job").html($("#current-job").html());

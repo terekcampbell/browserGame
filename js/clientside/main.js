@@ -9,6 +9,7 @@ function prepEvents() {
 	$("#gather-sticks").click({type: "gather", collectedItem: "sticks", timer: "gatherSticksTimer", callback: postAction, qtyElement: "sticks-quantity"}, changeJob);
 
 	$("#craft-knockedStone").click({type: "craft", collectedItem: "knockedStones", timer: "craftKnockedStoneTimer", callback: postAction, qtyElement: "knockedStones-quantity"}, changeJob);
+	$("#craft-stoneBowl").click({type: "craft", collectedItem: "stoneBowls", timer: "craftStoneBowlTimer", callback: postAction, qtyElement: "stoneBowls-quantity"}, changeJob);
 }
 
 function changeJob(args) {

@@ -61,8 +61,9 @@ app.get('/changeJob', function (req, res) {
 	// TODO: Make these readFile calls asynchronous
 	fs.readFile(usersFile, 'utf8', function (usersErr, usersData) {
 		var usersData = refresh(userId, usersData);
-		var lastUpdate = usersData[userId].lastUpdate;
-		usersData[userId].currentJob = jobType.concat(" ").concat(collectedItem);
+		var user = usersData[userId];
+		var lastUpdate = user.lastUpdate;
+		user.currentJob = jobType.concat(" ").concat(collectedItem);
 
 		fs.readFile(itemsFile, 'utf8', function (itemsErr, itemsJSON) {
 			var itemsData = JSON.parse(itemsJSON);
@@ -80,8 +81,18 @@ app.get('/changeJob', function (req, res) {
 				var baseTimeToCraft = itemsData.actions.crafting[collectedItem].baseCraftTime;
 				var amountCollected = itemsData.actions.crafting[collectedItem].baseNumberCrafted;
 				var totalTime = baseTimeToCraft;
+				// TODO: Make general use
+				var smallStoneCost = itemsData.actions.crafting[collectedItem].resources.smallStones;
+				var userSmallStoneQty = user.smallStones;
+				if (userSmallStoneQty < smallStoneCost) {
+					res.end("Insufficient Resources Error");
+					return;
+				}
+				user.smallStones -= smallStoneCost;
+
 			}
 			console.log("Before makeActionTimer");
+			// TODO: Add resource cost for crafted items to timer for later cancelations
 			usersData = makeActionTimer(res, userId, lastUpdate, totalTime, jobType, collectedItem, amountCollected, usersData);
 
 			var result = JSON.stringify(usersData,null,4);
@@ -94,9 +105,14 @@ app.get('/changeJob', function (req, res) {
 				console.log('Job changed successfully');
 			});
 			console.log("-----END CHANGE JOB-----");
+			// TODO: Change resourcesSpent to be general
+			// TODO: Verify resourcesSpent always works whether crafting or not
 			response = {
 				time:totalTime,
-				amountCollected:amountCollected
+				amountCollected:amountCollected,
+				resourcesSpent: {
+					smallStones: smallStoneCost
+				}
 			};
 			res.end(JSON.stringify(response));
 		});
@@ -126,7 +142,7 @@ app.get('/addUser', function (req, res) {
 
 		data[newUserId] = defaultNewUser;
 		data[newUserId].id = userCount;
-		data[newUserId].name = req.body.name;
+		data[newUserId].name = req.query.name;
 		data[newUserId].lastUpdate = new Date();
 		data.userCount = userCount;
 
@@ -177,14 +193,11 @@ function refresh(userId, data) {
 		var user = data[userId];
 
 		var currentTime = new Date();
-
-		 var lastUpdate = new Date(data[userId].lastUpdate);
-		// var updatedRefreshDate = checkForTimer(user, lastUpdate, currentTime);
+		var lastUpdate = new Date(data[userId].lastUpdate);
+		
 		checkForTimer(user, lastUpdate, currentTime);
-		// var mult = (currentTime - updatedRefreshDate)/1000;
-		// var job = user.currentJob;
-
 		user.lastUpdate = currentTime;
+
 		console.log("-----END REFRESH-----");
 
 	return data;
@@ -217,7 +230,6 @@ function makeActionTimer(res, userId, lastUpdate, seconds, action, item, itemQua
 
 	if (newRefreshTime !== lastUpdate) {
 		console.log("A timer already exists, not creating new one");
-		// TODO: Am I sure I want to send the response here?
 		res.end("Existing Timer Error");
 		console.log("-----END MAKE ACTION TIMER-----");
 		return data;
@@ -258,7 +270,7 @@ function checkForTimer(user, lastUpdate, currentTime) {
 			user[timer.item] += timer.itemQuantity;
 			newRefreshTime = timerEndTime;
 			timers.count -= 1;
-			// TODO: I may not be deleting the correct timer, especially if I expand this behavior to multiple active timers
+			// TODO: I will not be deleting the correct timer if I expand this behavior to multiple active timers
 			delete timers[tm];
 			user.currentJob = timer.oldJob;
 			console.log("Timer completed, prorating resource update");
