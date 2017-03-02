@@ -47,19 +47,21 @@ function changeJobAjax(jobType, element, callback, qtyElement, toolUsed, storage
 			"collectedItem" : collectedItem
 		},
 		success : function(response) {
-			if (response === "Existing Timer Error" || response === "Insufficient Resources Error") {
+			if (response === "Existing Timer Error" || response.includes("Insufficient Resources Error")) {
 				console.log("Failure in changeJobAjax: " + response);
 				return;
 			}
 			var jsonResponse = JSON.parse(response);
 			var time = jsonResponse.time;
 			var amountCollected = jsonResponse.amountCollected;
-			var resourcesSpent = jsonResponse.resourcesSpent;
-			// TODO: Make more general
+			var resourcesSpent = jsonResponse.itemCost;
 
-			$("#smallStones-quantity").html(Number($("#smallStones-quantity").html())-resourcesSpent.smallStones);
-
-
+			// TODO: May not need this if check
+			if (jobType === "craft") {
+				for (var resource in resourcesSpent) {
+					$("#"+resource+"-quantity").html(Number($("#"+resource+"-quantity").html())-resourcesSpent[resource]);
+				}
+			}
 
 			console.log("Success in changeJobAjax");
 			$("#previous-job").html($("#current-job").html());

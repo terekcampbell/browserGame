@@ -30,7 +30,7 @@
         },
         "harvest": {
             "hands": {
-                "speedMultiplier": 50,
+                "speedMultiplier": 20,
                 "maxQuality": 100,
                 "baseQuality": 100
             },
@@ -61,14 +61,16 @@
                 "baseCraftTime": 2,
                 "baseNumberCrafted": 1,
                 "resources": {
-                    "smallStones": 1
+                    "smallStones": 1,
+                    "sticks": 1
                 }
             },
             "stoneBowls": {
                 "baseCraftTime": 2,
                 "baseNumberCrafted": 1,
                 "resources": {
-                    "smallStones": 10
+                    "smallStones": 10,
+                    "sticks": 10
                 }
             }
         }

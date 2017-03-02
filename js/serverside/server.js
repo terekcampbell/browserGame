@@ -60,6 +60,7 @@ app.get('/changeJob', function (req, res) {
 	var storageItem = req.query.storageItem;
 	// TODO: Make these readFile calls asynchronous
 	fs.readFile(usersFile, 'utf8', function (usersErr, usersData) {
+		var errorList = [];
 		var usersData = refresh(userId, usersData);
 		var user = usersData[userId];
 		var lastUpdate = user.lastUpdate;
@@ -67,6 +68,7 @@ app.get('/changeJob', function (req, res) {
 
 		fs.readFile(itemsFile, 'utf8', function (itemsErr, itemsJSON) {
 			var itemsData = JSON.parse(itemsJSON);
+			var itemCost = {};
 			if (jobType === "gather") {
 				var speedMultiplier = itemsData.tools.harvest[toolUsed].speedMultiplier;
 				var capacity = itemsData.tools.storage[toolUsed].capacity;
@@ -81,19 +83,39 @@ app.get('/changeJob', function (req, res) {
 				var baseTimeToCraft = itemsData.actions.crafting[collectedItem].baseCraftTime;
 				var amountCollected = itemsData.actions.crafting[collectedItem].baseNumberCrafted;
 				var totalTime = baseTimeToCraft;
-				// TODO: Make general use
-				var smallStoneCost = itemsData.actions.crafting[collectedItem].resources.smallStones;
-				var userSmallStoneQty = user.smallStones;
-				if (userSmallStoneQty < smallStoneCost) {
-					res.end("Insufficient Resources Error");
+
+				for (var resource in itemsData.actions.crafting[collectedItem].resources) {
+					var resourceCost = itemsData.actions.crafting[collectedItem].resources[resource];
+					var userResourceQty = user[resource];
+
+					itemCost[resource] = resourceCost;
+
+					if (userResourceQty < resourceCost) {
+						const insfResErr = "Insufficient Resources Error: "+resource;
+						errorList.push(insfResErr);
+					}
+				}
+
+				if (errorList.length > 0) {
+					res.end(errorList[0]);
+					console.log(errorList[0]);
 					return;
 				}
-				user.smallStones -= smallStoneCost;
-
 			}
-			console.log("Before makeActionTimer");
 			// TODO: Add resource cost for crafted items to timer for later cancelations
-			usersData = makeActionTimer(res, userId, lastUpdate, totalTime, jobType, collectedItem, amountCollected, usersData);
+			usersData = makeActionTimer(userId, lastUpdate, totalTime, jobType, collectedItem, amountCollected, usersData, itemCost, errorList);
+
+			if (errorList.length > 0) {
+				res.end(errorList[0]);
+				console.log(errorList[0]);
+				return;
+			}
+
+			for (var resource in itemCost) {
+				user[resource] -= itemCost[resource];
+			}
+
+
 
 			var result = JSON.stringify(usersData,null,4);
 
@@ -105,15 +127,11 @@ app.get('/changeJob', function (req, res) {
 				console.log('Job changed successfully');
 			});
 			console.log("-----END CHANGE JOB-----");
-			// TODO: Change resourcesSpent to be general
-			// TODO: Verify resourcesSpent always works whether crafting or not
 			response = {
 				time:totalTime,
 				amountCollected:amountCollected,
-				resourcesSpent: {
-					smallStones: smallStoneCost
-				}
-			};
+				itemCost
+			}
 			res.end(JSON.stringify(response));
 		});
 	});
@@ -207,7 +225,7 @@ function addSeconds(date, seconds) {
     return new Date(date.getTime() + seconds*1000);
 }
 
-function makeActionTimer(res, userId, lastUpdate, seconds, action, item, itemQuantity, data) {
+function makeActionTimer(userId, lastUpdate, seconds, action, item, itemQuantity, data, itemCost, errorList) {
 
 	var defaultNewTimer = {
 		"id" : 0,
@@ -229,8 +247,7 @@ function makeActionTimer(res, userId, lastUpdate, seconds, action, item, itemQua
 	console.log("newRefreshTime: "+newRefreshTime);
 
 	if (newRefreshTime !== lastUpdate) {
-		console.log("A timer already exists, not creating new one");
-		res.end("Existing Timer Error");
+		errorList.push("Existing Timer Error");
 		console.log("-----END MAKE ACTION TIMER-----");
 		return data;
 	}
