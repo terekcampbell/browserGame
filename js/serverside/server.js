@@ -69,6 +69,8 @@ app.get('/changeJob', function (req, res) {
 		fs.readFile(itemsFile, 'utf8', function (itemsErr, itemsJSON) {
 			var itemsData = JSON.parse(itemsJSON);
 			var itemCost = {};
+			var craftingProficiency = null;
+
 			if (jobType === "gather") {
 				var speedMultiplier = itemsData.tools.harvest[toolUsed].speedMultiplier;
 				var capacity = itemsData.tools.storage[toolUsed].capacity;
@@ -84,30 +86,33 @@ app.get('/changeJob', function (req, res) {
 				var amountCollected = itemsData.actions.crafting[collectedItem].baseNumberCrafted;
 				var totalTime = baseTimeToCraft;
 
+				craftingProficiency = user[collectedItem].proficiency;
+
 				for (var resource in itemsData.actions.crafting[collectedItem].resources) {
 					var resourceCost = itemsData.actions.crafting[collectedItem].resources[resource];
 					var userResourceQty = user[resource];
 
+
 					itemCost[resource] = resourceCost;
 
 					if (userResourceQty < resourceCost) {
-						const insfResErr = "Insufficient Resources Error: "+resource;
-						errorList.push(insfResErr);
+						errorList.push("Insufficient Resources Error: "+resource);
 					}
 				}
 
 				if (errorList.length > 0) {
 					res.end(errorList[0]);
 					console.log(errorList[0]);
+					console.log("-----END CHANGE JOB-----");
 					return;
 				}
 			}
-			// TODO: Add resource cost for crafted items to timer for later cancelations
-			usersData = makeActionTimer(userId, lastUpdate, totalTime, jobType, collectedItem, amountCollected, usersData, itemCost, errorList);
 
+			usersData = makeActionTimer(userId, lastUpdate, totalTime, jobType, collectedItem, amountCollected, usersData, itemCost, craftingProficiency, errorList);
 			if (errorList.length > 0) {
 				res.end(errorList[0]);
 				console.log(errorList[0]);
+				console.log("-----END CHANGE JOB-----");
 				return;
 			}
 
@@ -115,10 +120,7 @@ app.get('/changeJob', function (req, res) {
 				user[resource] -= itemCost[resource];
 			}
 
-
-
 			var result = JSON.stringify(usersData,null,4);
-
 			fs.writeFile(usersFile, result, function(writeErr) {
 				if (writeErr) {
 					throw writeErr;
@@ -171,8 +173,12 @@ app.get('/addUser', function (req, res) {
 			for (var resource in itemsData.resources) {
 				data[newUserId][resource] = 0;
 			}
-			for (var item in itemsData.actions.crafting) {
-				data[newUserId][item] = 0;
+			for (var itemName in itemsData.actions.crafting) {
+				data[newUserId][itemName] = {};
+				data[newUserId][itemName].count = 0;
+
+				data[newUserId][itemName].proficiency = itemsData.actions.crafting[itemName].baseQuality;
+				data[newUserId][itemName].qualities = [];
 			}
 
 			var result = JSON.stringify(data,null,4);
@@ -225,7 +231,7 @@ function addSeconds(date, seconds) {
     return new Date(date.getTime() + seconds*1000);
 }
 
-function makeActionTimer(userId, lastUpdate, seconds, action, item, itemQuantity, data, itemCost, errorList) {
+function makeActionTimer(userId, lastUpdate, seconds, action, item, itemQuantity, data, itemCost, craftingProficiency, errorList) {
 
 	var defaultNewTimer = {
 		"id" : 0,
@@ -262,6 +268,8 @@ function makeActionTimer(userId, lastUpdate, seconds, action, item, itemQuantity
 	timers[newTimerId].type = action;
 	timers[newTimerId].item = item;
 	timers[newTimerId].itemQuantity = itemQuantity;
+	timers[newTimerId].itemCost = itemCost;
+	timers[newTimerId].craftingProficiency = craftingProficiency;
 
 	timers[newTimerId].endTime = addSeconds(lastUpdate, seconds);
 
@@ -284,7 +292,15 @@ function checkForTimer(user, lastUpdate, currentTime) {
 		currentTimer = true;
 
 		if (currentTime - timerEndTime > 0) {
-			user[timer.item] += timer.itemQuantity;
+			if (timer.type === "craft") {
+				user[timer.item].count += timer.itemQuantity;
+				// TODO: Add max proficiency cap
+				var proficiency = user[timer.item].proficiency;
+				user[timer.item].qualities.push(proficiency);
+				user[timer.item].proficiency = Number((proficiency + 0.1*(100-proficiency)).toFixed(2));
+			} else {
+				user[timer.item] += timer.itemQuantity;
+			}
 			newRefreshTime = timerEndTime;
 			timers.count -= 1;
 			// TODO: I will not be deleting the correct timer if I expand this behavior to multiple active timers

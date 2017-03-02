@@ -1,3 +1,4 @@
+// TODO: Refactor to use object holding callback args
 function countdown(element, seconds, nextFunc, nextFuncArg1, nextFuncArg2) {
     var minutes = Math.floor(seconds/60);
     seconds %= 60;

@@ -24,8 +24,8 @@ function refresh() {
 			$("#berries-quantity").html(data.berries);
 			$("#smallStones-quantity").html(data.smallStones);
 			$("#sticks-quantity").html(data.sticks);
-			$("#knockedStones-quantity").html(data.knockedStones);
-			$("#stoneBowls-quantity").html(data.stoneBowls);
+			$("#knockedStones-quantity").html(data.knockedStones.count);
+			$("#stoneBowls-quantity").html(data.stoneBowls.count);
 		},
 		error : function(jqXHR, textStatus, errorThrown) {
 			console.log("There was an error with the 'refresh' AJAX request");

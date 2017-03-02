@@ -62,7 +62,7 @@ Research:
 * Eat nuts/forage nuts (nuts don't go bad)
 * Crack nuts with tool
   * Smack with rock
-* nut cracking tool (faster than cracking with rock)
+  * nut cracking tool (faster than cracking with rock)
 * 
 
 
